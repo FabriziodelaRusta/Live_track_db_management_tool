@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+    branches: [ "**" ]
+
+jobs:
+  build-and-test:
+    name: Build & Validate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: TypeScript Lint Check
+        run: npm run lint
+
+      - name: Validate Standalone HTML File
+        run: npm run validate:html
+
+      - name: Build Application (Vite)
+        run: npm run build
+
+      - name: Verify Distribution Files
+        run: |
+          test -f dist/index.html || (echo "dist/index.html missing" && exit 1)
+          test -f dist/Live_track_db_manager.html || (echo "dist/Live_track_db_manager.html missing" && exit 1)
+          echo "All dist files verified successfully."
